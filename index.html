@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>e621 Tag Picker</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Pick the theme before the page shows, so it doesn't flash the wrong colors.
+    // Blue is the default; dark is used if you switched to it last time.
+    try {
+      if (JSON.parse(localStorage.getItem("e621-tag-picker:theme")) === "dark") {
+        document.documentElement.dataset.theme = "dark";
+      }
+    } catch {}
+  </script>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>e621 Tag Picker</h1>
+      <p>Pick tags and filters, and this page writes the search for you.</p>
+    </div>
+    <label class="theme-picker">
+      Theme
+      <select id="theme-select">
+        <option value="e621">e621</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT SIDE: everything you pick -->
+    <div class="pickers">
+
+      <details class="card collapsible" id="tags-section" open>
+        <summary><h2 data-help="tags">Tags</h2></summary>
+        <p class="hint">Type a tag and press <kbd>Enter</kbd>. Click a tag's name to see its family. Press any <strong>?</strong> for more help.</p>
+
+        <div class="tagbox-wrap must">
+          <h3 data-help="must">✅ Must have <span class="sub">posts must have all of these</span></h3>
+          <div id="must-box"></div>
+        </div>
+
+        <div class="tagbox-wrap any">
+          <h3 data-help="any">🔀 Any of these <span class="sub">posts need at least one tag from each group</span></h3>
+          <div id="any-groups"></div>
+          <button type="button" id="add-group" class="small">+ Add another group</button>
+        </div>
+
+        <div class="tagbox-wrap exclude">
+          <h3 data-help="exclude">🚫 Exclude <span class="sub">hide posts that have any of these</span></h3>
+          <div id="exclude-box"></div>
+        </div>
+      </details>
+
+      <details class="card collapsible" id="filters-section" open>
+        <summary><h2 data-help="filters">Filters</h2></summary>
+
+        <div class="field">
+          <span class="label" data-help="rating">Rating</span>
+          <div class="checks">
+            <label><input type="checkbox" data-key="rating_s"> Safe</label>
+            <label><input type="checkbox" data-key="rating_q"> Questionable</label>
+            <label><input type="checkbox" data-key="rating_e"> Explicit</label>
+          </div>
+          <span class="note">Leave all unticked to allow every rating.</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="order" data-help="order">Sort by</label>
+          <select id="order" data-key="order">
+            <optgroup label="Common">
+              <option value="">Newest first (default)</option>
+              <option value="id_asc">Oldest first</option>
+              <option value="score">Highest score</option>
+              <option value="favcount">Most favorites</option>
+              <option value="comment_count">Most comments</option>
+              <option value="hot">Hot right now</option>
+              <option value="random">Random</option>
+            </optgroup>
+            <optgroup label="More">
+              <option value="score_asc">Lowest score</option>
+              <option value="favcount_asc">Fewest favorites</option>
+              <option value="comment">Newest comments</option>
+              <option value="mpixels">Biggest resolution</option>
+              <option value="mpixels_asc">Smallest resolution</option>
+              <option value="filesize">Biggest file size</option>
+              <option value="filesize_asc">Smallest file size</option>
+              <option value="landscape">Widest first</option>
+              <option value="portrait">Tallest first</option>
+              <option value="duration">Longest videos</option>
+              <option value="duration_asc">Shortest videos</option>
+              <option value="tagcount">Most tags</option>
+              <option value="tagcount_asc">Fewest tags</option>
+              <option value="updated">Recently updated</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="field">
+          <span class="label" data-help="score">Score</span>
+          <div class="range">
+            <input type="number" data-key="score_min" placeholder="min" aria-label="Minimum score">
+            <span>to</span>
+            <input type="number" data-key="score_max" placeholder="max" aria-label="Maximum score">
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" data-help="favs">Favorites</span>
+          <div class="range">
+            <input type="number" min="0" data-key="favs_min" placeholder="min" aria-label="Minimum favorites">
+            <span>to</span>
+            <input type="number" min="0" data-key="favs_max" placeholder="max" aria-label="Maximum favorites">
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" data-help="type">File type</span>
+          <div class="checks types">
+            <button type="button" class="tri-group" data-group="pictures">Pictures</button>
+            <button type="button" class="tri" data-type="jpg">JPG</button>
+            <button type="button" class="tri" data-type="png">PNG</button>
+            <button type="button" class="tri" data-type="webp">WebP</button>
+          </div>
+          <div class="checks types">
+            <button type="button" class="tri-group" data-group="animations">Animations</button>
+            <button type="button" class="tri" data-type="gif">GIF</button>
+            <button type="button" class="tri" data-type="mp4">MP4</button>
+            <button type="button" class="tri" data-type="webm">WebM</button>
+          </div>
+          <input type="hidden" data-key="type_jpg"><input type="hidden" data-key="type_png">
+          <input type="hidden" data-key="type_gif"><input type="hidden" data-key="type_webp">
+          <input type="hidden" data-key="type_mp4"><input type="hidden" data-key="type_webm">
+          <span class="note">Click a type once to want it (✓), twice to exclude it (✕), and a third time to clear it. Click Pictures or Animations to do the same for the whole row.</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="date" data-help="date">Uploaded</label>
+          <select id="date" data-key="date">
+            <option value="">Any time</option>
+            <option value="today">Today</option>
+            <option value="week">In the last 7 days</option>
+            <option value="month">In the last 30 days</option>
+            <option value="year">In the last year</option>
+            <option value="yesterweek">Last week</option>
+            <option value="yestermonth">Last month</option>
+            <option value="yesteryear">Last year</option>
+            <option value="custom">Between two dates…</option>
+          </select>
+          <div class="range" id="custom-dates" hidden>
+            <input type="date" data-key="date_from" aria-label="From date">
+            <span>to</span>
+            <input type="date" data-key="date_to" aria-label="To date">
+          </div>
+        </div>
+      </details>
+
+      <details class="card advanced collapsible" id="advanced-section">
+        <summary><h2 data-help="advanced">Advanced filters</h2></summary>
+
+        <div class="field">
+          <span class="label" data-help="size">Width (pixels)</span>
+          <div class="range">
+            <input type="number" min="0" data-key="width_min" placeholder="min" aria-label="Minimum width">
+            <span>to</span>
+            <input type="number" min="0" data-key="width_max" placeholder="max" aria-label="Maximum width">
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" data-help="size">Height (pixels)</span>
+          <div class="range">
+            <input type="number" min="0" data-key="height_min" placeholder="min" aria-label="Minimum height">
+            <span>to</span>
+            <input type="number" min="0" data-key="height_max" placeholder="max" aria-label="Maximum height">
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" data-help="duration">Video length (seconds)</span>
+          <div class="range">
+            <input type="number" min="0" data-key="duration_min" placeholder="min" aria-label="Minimum length">
+            <span>to</span>
+            <input type="number" min="0" data-key="duration_max" placeholder="max" aria-label="Maximum length">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="uploader" data-help="uploader">Uploaded by</label>
+          <input type="text" id="uploader" data-key="uploader" placeholder="username">
+        </div>
+
+        <div class="field">
+          <label class="label" for="favby" data-help="favby">Favorited by</label>
+          <input type="text" id="favby" data-key="favby" placeholder="username (or me, if you're logged in)">
+        </div>
+
+        <div class="field">
+          <label class="label" for="pool" data-help="pool">In pool</label>
+          <input type="text" id="pool" data-key="pool" placeholder="pool number or name">
+        </div>
+
+        <div class="field">
+          <label class="label" for="set" data-help="set">In set</label>
+          <input type="text" id="set" data-key="set" placeholder="set number or short name">
+        </div>
+
+        <div class="field">
+          <label class="label" for="description" data-help="description">Description contains</label>
+          <input type="text" id="description" data-key="description" placeholder="any text">
+        </div>
+
+        <div class="field">
+          <label class="label" for="status" data-help="status">Post status</label>
+          <select id="status" data-key="status">
+            <option value="">Normal (hide deleted posts)</option>
+            <option value="pending">Waiting for approval</option>
+            <option value="flagged">Flagged for deletion</option>
+            <option value="deleted">Deleted only</option>
+            <option value="any">Everything, including deleted</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="label" for="extra" data-help="extra">Extra search text</label>
+          <input type="text" id="extra" data-key="extra" placeholder="anything else, added exactly as typed">
+          <span class="note">For e621 search parts this page has no box for. Pasted searches put those parts here.</span>
+        </div>
+
+        <div class="field">
+          <span class="label" data-help="other">Other</span>
+          <div class="checks column">
+            <label><input type="checkbox" data-key="artverified"> Only uploaded by verified artists</label>
+            <label><input type="checkbox" data-key="nopool"> Not part of a pool (no comics)</label>
+            <label><input type="checkbox" data-key="noparent"> Hide alternate versions (posts that have a parent)</label>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- RIGHT SIDE: the finished search -->
+    <aside class="result">
+      <section class="card">
+        <h2 data-help="search">Your search</h2>
+        <textarea id="query" class="query" rows="2" spellcheck="false" aria-label="Your search"
+          placeholder="Nothing picked yet: this would show every post. You can also type or paste a search here."></textarea>
+        <div class="query-tools">
+          <span id="query-hint" class="query-hint">You can type or paste a search here too.</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <div id="matches" class="matches">
+          <span id="match-text"></span>
+          <button type="button" id="count-btn" class="small" hidden title="Counts the posts that logged-out visitors can see">Count posts</button>
+        </div>
+        <p id="family-status" class="family-status" hidden></p>
+        <p id="explain" class="explain"></p>
+        <ul id="warnings" class="warnings"></ul>
+        <div class="buttons">
+          <button type="button" id="copy" class="primary">Copy search</button>
+          <a id="open" class="button primary" target="_blank" rel="noopener">Open on e621 ↗</a>
+          <button type="button" id="copy-link" title="Copy the e621 address, to paste into a private window">Copy link</button>
+          <button type="button" id="clear">Clear all</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 data-help="saved">Saved searches</h2>
+          <div class="backup">
+            <button type="button" id="export" class="small" title="Download your saved searches as a file">⬇️ Export</button>
+            <button type="button" id="import" class="small" title="Load saved searches from an exported file">⬆️ Import</button>
+            <input type="file" id="import-file" accept=".json,application/json" hidden>
+          </div>
+        </div>
+        <form id="save-form" class="save-row">
+          <input type="text" id="save-name" placeholder="Name this search" aria-label="Search name">
+          <button type="submit">Save</button>
+        </form>
+        <ul id="saved-list" class="saved-list"></ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    Unofficial fan-made tool. Not affiliated with or endorsed by e621.
+    It only builds searches; all posts and tags come from e621.net.
+  </footer>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
