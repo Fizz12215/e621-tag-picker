@@ -1,0 +1,75 @@
+/* Styles the add-on adds to e621's pages. Everything starts with "etp-"
+   (e621 Tag Picker) so it can't clash with e621's own styles. */
+
+.etp-button {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #fcb328;
+  color: #1f3c67;
+  font: bold 14px/1.3 sans-serif;
+  cursor: pointer;
+}
+.etp-button:hover { background: #ffd27a; }
+
+.etp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.etp-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(1300px, 96vw);
+  height: 94vh;
+  height: 94dvh;
+  overflow: hidden;
+  border: 3px solid #fcb328;
+  border-radius: 10px;
+  background: #1f3c67;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.etp-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  color: #fff;
+  font: bold 15px/1.3 sans-serif;
+}
+
+.etp-close {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #fcb328;
+  color: #1f3c67;
+  font: bold 14px/1.3 sans-serif;
+  cursor: pointer;
+}
+
+.etp-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: #020f23;
+}
+
+/* The picker's Dark theme */
+.etp-dark .etp-panel { background: #18181b; }
+.etp-dark .etp-frame { background: #0b0b0d; }
+
+/* Phones: use the whole screen */
+@media (max-width: 700px) {
+  .etp-panel { width: 100vw; height: 100vh; height: 100dvh; border: 0; border-radius: 0; }
+}
+
+html.etp-open, html.etp-open body { overflow: hidden; }

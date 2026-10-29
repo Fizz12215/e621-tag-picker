@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "name": "e621 Tag Picker",
+  "version": "1.0.0",
+  "description": "Adds a Tag Picker button under e621's search bar. Pick tags and filters with buttons, and it writes the search for you. Unofficial, not affiliated with e621.",
+  "homepage_url": "https://github.com/Fizz12215/e621-tag-picker",
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  },
+  "permissions": [
+    "https://e621.net/*",
+    "https://e926.net/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://e621.net/*", "https://e926.net/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "web_accessible_resources": ["picker/index.html"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "e621-tag-picker@fizz12215",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": { "required": ["none"] }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  }
+}

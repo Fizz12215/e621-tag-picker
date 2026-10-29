@@ -2210,3 +2210,37 @@ $("#date").addEventListener("change", showCustomDates);
 // Start with whatever was on the page last time
 loadSnapshot(storageGet(STORAGE_CURRENT, null));
 drawSaved();
+
+// ============================================================
+// 13. Firefox add-on panel
+// ============================================================
+// The add-on opens this page in a panel on top of e621, with an address like
+// index.html?embed=1&from=https://e621.net#q=wolf+snow
+// In that case: start from the search that was in e621's search box, and
+// "Open on e621" becomes "Use this search", which hands the search back to e621.
+const embed = new URLSearchParams(location.search);
+if (embed.has("embed") && window.parent !== window) {
+  const parentOrigin = embed.get("from");
+  document.documentElement.classList.add("embedded");
+
+  const startQuery = new URLSearchParams(location.hash.slice(1)).get("q");
+  if (startQuery && startQuery.trim()) {
+    queryBox.value = startQuery;
+    queryTyped = true;
+    applyQueryBox();
+  }
+
+  const open = $("#open");
+  open.textContent = "Use this search";
+  open.removeAttribute("target");
+  open.addEventListener("click", (e) => {
+    e.preventDefault();
+    applyQueryBox(); // in case the search box has changes that weren't applied yet
+    window.parent.postMessage({ type: "e621-tag-picker:use", query: buildSearch().query }, parentOrigin);
+  });
+
+  // The panel's title bar is part of e621's page, so tell it which theme to match
+  const tellTheme = () => window.parent.postMessage({ type: "e621-tag-picker:theme", theme: themeSelect.value }, parentOrigin);
+  tellTheme();
+  themeSelect.addEventListener("change", tellTheme);
+}

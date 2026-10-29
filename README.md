@@ -62,6 +62,26 @@ With the Tag Picker you never have to type that. You put tags into boxes and cli
 
 - **Online:** open https://fizz12215.github.io/e621-tag-picker/
 - **On your own computer:** download this project (green **Code** button → **Download ZIP**), unzip it, and open `index.html` in your browser. Nothing to install.
+- **Firefox add-on (computer and Android):** adds a **Tag Picker** button under e621's own search bar. See [Firefox add-on](#firefox-add-on).
+
+## Firefox add-on
+
+The add-on puts a **Tag Picker** button right under the search bar on e621.net (and e926.net).
+Tap it, and the Tag Picker opens in a panel on top of e621, already filled in with whatever was in e621's search bar.
+Pick your tags and filters, press **Use this search**, and e621 runs it. It works in Firefox on computers and on Android.
+
+The add-on is the same Tag Picker as the website. Its saved searches are kept separately from the website's,
+so use **Export** and **Import** to move them between the two.
+
+**Building it:** run `./build-extension.sh`. It copies the website files into the add-on and makes:
+- `dist/firefox/`: the add-on as a folder
+- `dist/e621-tag-picker-firefox-<version>.zip`: the add-on as one file, ready to upload to Mozilla
+
+**Trying it on a computer:** in Firefox, open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…**,
+and pick `dist/firefox/manifest.json`. It stays until Firefox closes.
+
+**Installing it for good (needed on Android):** Firefox only installs add-ons that Mozilla has signed.
+Upload the zip at [addons.mozilla.org/developers](https://addons.mozilla.org/developers/) to get it signed.
 
 ## Privacy
 
@@ -70,13 +90,16 @@ Saved searches and settings are stored in your browser only, and never sent anyw
 
 ## How it's built
 
-Plain HTML, CSS and JavaScript, with no frameworks and no build step:
+Plain HTML, CSS and JavaScript, with no frameworks and no build step for the website:
 
 | File | What's in it |
 |---|---|
 | `index.html` | Everything you see on the page |
 | `style.css` | Colors, layout and the two themes |
 | `app.js` | The logic: tag boxes, building the search, reading pasted searches, talking to e621 |
+| `theme.js` | Picks the saved theme before the page shows, so the colors don't flash |
+| `extension/` | The Firefox add-on: `manifest.json` describes it, `content.js` and `content.css` add the button and panel to e621 |
+| `build-extension.sh` | Builds the add-on from the files above |
 
 Search rules come from e621's [search cheatsheet](https://e621.net/help/cheatsheet). Requests to e621 are spaced out to stay within the
 [API's rate limits](https://e621.net/help/api).
@@ -85,7 +108,7 @@ Search rules come from e621's [search cheatsheet](https://e621.net/help/cheatshe
 
 This project was made with **Claude**, an AI assistant by Anthropic, using Claude Code.
 
-- **Written by AI:** most of the code (`index.html`, `style.css`, `app.js`), the help text inside the app, and this README.
+- **Written by AI:** most of the code (`index.html`, `style.css`, `app.js`, `theme.js` and the Firefox add-on), the help text inside the app, and this README.
 - **Done by a person ([Fizz12215](https://github.com/Fizz12215)):** the idea, choosing every feature and how it should look and work, and trying it out and reporting problems.
 - **Testing:** the AI checked features in a browser and ran the searches the page builds against e621 to make sure they find the right posts. That catches a lot, but not everything, so if something seems wrong, please open an issue.
 

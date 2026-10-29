@@ -5,15 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>e621 Tag Picker</title>
   <link rel="stylesheet" href="style.css">
-  <script>
-    // Pick the theme before the page shows, so it doesn't flash the wrong colors.
-    // Blue is the default; dark is used if you switched to it last time.
-    try {
-      if (JSON.parse(localStorage.getItem("e621-tag-picker:theme")) === "dark") {
-        document.documentElement.dataset.theme = "dark";
-      }
-    } catch {}
-  </script>
+  <script src="theme.js"></script>
 </head>
 <body>
   <header class="top">
